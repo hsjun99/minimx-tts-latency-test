@@ -1,0 +1,28 @@
+[project]
+name = "minimax-tts-latency-test"
+version = "0.1.0"
+description = "FastAPI service to measure MiniMax TTS WS connect and TTFB latencies"
+authors = [
+    {name = "Ryan Han"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "fastapi (>=0.119.0,<0.120.0)",
+    "uvicorn (>=0.38.0,<0.39.0)",
+    "aiohttp (>=3.13.1,<4.0.0)",
+    "python-dotenv (>=1.1.1,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.14.1"
+mypy = "^1.18.2"
+types-aiofiles = "^25.1.0.20251011"
+types-requests = "^2.32.4.20250913"
+
