@@ -7,6 +7,11 @@ from .minimax_latency import measure_minimax_tts_latency, MiniMaxConfig
 app = FastAPI(title="MiniMax TTS Latency Test")
 
 
+@app.get("/healthz")
+async def healthz():
+    return {"status": "ok"}
+
+
 @app.get("/minimax/tts-latency")
 async def minimax_tts_latency(
     sentence: str = Query(
