@@ -19,6 +19,12 @@ class Settings:
     openai_base_url: str
     openai_model: str
     openai_system_prompt_path: str
+    azure_openai_api_key: str
+    azure_openai_endpoint: str
+    azure_openai_deployment: str
+    azure_openai_model: str
+    azure_openai_api_version: str
+    azure_openai_system_prompt_path: str
 
 
 def get_settings() -> Settings:
@@ -30,6 +36,16 @@ def get_settings() -> Settings:
     openai_system_prompt_path = os.getenv(
         "OPENAI_SYSTEM_PROMPT_PATH", DEFAULT_SYSTEM_PROMPT_PATH
     ).strip()
+    azure_api_key = os.getenv("AZURE_OPENAI_API_KEY", "").strip()
+    azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT", "").strip()
+    azure_deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT", "").strip()
+    azure_model = os.getenv("AZURE_OPENAI_MODEL", "").strip()
+    azure_api_version = os.getenv(
+        "AZURE_OPENAI_API_VERSION", "2024-02-15-preview"
+    ).strip()
+    azure_system_prompt_path = os.getenv(
+        "AZURE_OPENAI_SYSTEM_PROMPT_PATH", DEFAULT_SYSTEM_PROMPT_PATH
+    ).strip()
 
     return Settings(
         minimax_api_key=api_key,
@@ -38,4 +54,10 @@ def get_settings() -> Settings:
         openai_base_url=openai_base_url,
         openai_model=openai_model,
         openai_system_prompt_path=openai_system_prompt_path,
+        azure_openai_api_key=azure_api_key,
+        azure_openai_endpoint=azure_endpoint,
+        azure_openai_deployment=azure_deployment,
+        azure_openai_model=azure_model,
+        azure_openai_api_version=azure_api_version,
+        azure_openai_system_prompt_path=azure_system_prompt_path,
     )
