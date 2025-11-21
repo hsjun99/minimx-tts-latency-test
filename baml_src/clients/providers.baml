@@ -62,3 +62,26 @@ client<llm> Groq_GPT_OSS_120B_LOW_REASONING {
     reasoning_effort "low"
   }
 }
+
+client<llm> Baseten_GPT_OSS_120B_MEDIUM_REASONING {
+  provider "openai-generic"
+  options {
+    base_url "https://inference.baseten.co/v1"
+    api_key env.BASETEN_API_KEY
+    model "openai/gpt-oss-120b"
+    temperature 0.0
+    reasoning_effort "medium"
+  }
+}
+
+
+client<llm> Baseten_GPT_OSS_120B_LOW_REASONING {
+  provider "openai-generic"
+  options {
+    base_url "https://inference.baseten.co/v1"
+    api_key env.BASETEN_API_KEY
+    model "openai/gpt-oss-120b"
+    temperature 0.0
+    reasoning_effort "low"
+  }
+}

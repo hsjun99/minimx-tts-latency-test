@@ -24,6 +24,18 @@ class LlmResponseParser:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
+    def GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> types.MultiRAGQueryResult:
+        result = self.__options.merge_options(baml_options).parse_response(function_name="GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low", llm_response=llm_response, mode="request")
+        return typing.cast(types.MultiRAGQueryResult, result)
+
+    def GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> types.MultiRAGQueryResult:
+        result = self.__options.merge_options(baml_options).parse_response(function_name="GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium", llm_response=llm_response, mode="request")
+        return typing.cast(types.MultiRAGQueryResult, result)
+
     def GenerateMultiRAGQuery_Cerebras_GPT_OSS_120B_Low(
         self, llm_response: str, baml_options: BamlCallOptions = {},
     ) -> types.MultiRAGQueryResult:
@@ -67,6 +79,18 @@ class LlmStreamParser:
 
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
+
+    def GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> stream_types.MultiRAGQueryResult:
+        result = self.__options.merge_options(baml_options).parse_response(function_name="GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low", llm_response=llm_response, mode="stream")
+        return typing.cast(stream_types.MultiRAGQueryResult, result)
+
+    def GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium(
+        self, llm_response: str, baml_options: BamlCallOptions = {},
+    ) -> stream_types.MultiRAGQueryResult:
+        result = self.__options.merge_options(baml_options).parse_response(function_name="GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium", llm_response=llm_response, mode="stream")
+        return typing.cast(stream_types.MultiRAGQueryResult, result)
 
     def GenerateMultiRAGQuery_Cerebras_GPT_OSS_120B_Low(
         self, llm_response: str, baml_options: BamlCallOptions = {},

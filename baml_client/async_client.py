@@ -79,6 +79,36 @@ class BamlAsyncClient:
     def parse_stream(self):
       return self.__llm_stream_parser
     
+    async def GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low(self, conversation_history: typing.List["types.ConversationMessage"],user_query: str,
+        baml_options: BamlCallOptions = {},
+    ) -> types.MultiRAGQueryResult:
+        # Check if on_tick is provided
+        if 'on_tick' in baml_options:
+            # Use streaming internally when on_tick is provided
+            stream = self.stream.GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low(conversation_history=conversation_history,user_query=user_query,
+                baml_options=baml_options)
+            return await stream.get_final_response()
+        else:
+            # Original non-streaming code
+            result = await self.__options.merge_options(baml_options).call_function_async(function_name="GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low", args={
+                "conversation_history": conversation_history,"user_query": user_query,
+            })
+            return typing.cast(types.MultiRAGQueryResult, result.cast_to(types, types, stream_types, False, __runtime__))
+    async def GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium(self, conversation_history: typing.List["types.ConversationMessage"],user_query: str,
+        baml_options: BamlCallOptions = {},
+    ) -> types.MultiRAGQueryResult:
+        # Check if on_tick is provided
+        if 'on_tick' in baml_options:
+            # Use streaming internally when on_tick is provided
+            stream = self.stream.GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium(conversation_history=conversation_history,user_query=user_query,
+                baml_options=baml_options)
+            return await stream.get_final_response()
+        else:
+            # Original non-streaming code
+            result = await self.__options.merge_options(baml_options).call_function_async(function_name="GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium", args={
+                "conversation_history": conversation_history,"user_query": user_query,
+            })
+            return typing.cast(types.MultiRAGQueryResult, result.cast_to(types, types, stream_types, False, __runtime__))
     async def GenerateMultiRAGQuery_Cerebras_GPT_OSS_120B_Low(self, conversation_history: typing.List["types.ConversationMessage"],user_query: str,
         baml_options: BamlCallOptions = {},
     ) -> types.MultiRAGQueryResult:
@@ -178,6 +208,30 @@ class BamlStreamClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
+    def GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low(self, conversation_history: typing.List["types.ConversationMessage"],user_query: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.BamlStream[stream_types.MultiRAGQueryResult, types.MultiRAGQueryResult]:
+        ctx, result = self.__options.merge_options(baml_options).create_async_stream(function_name="GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low", args={
+            "conversation_history": conversation_history,"user_query": user_query,
+        })
+        return baml_py.BamlStream[stream_types.MultiRAGQueryResult, types.MultiRAGQueryResult](
+          result,
+          lambda x: typing.cast(stream_types.MultiRAGQueryResult, x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(types.MultiRAGQueryResult, x.cast_to(types, types, stream_types, False, __runtime__)),
+          ctx,
+        )
+    def GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium(self, conversation_history: typing.List["types.ConversationMessage"],user_query: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.BamlStream[stream_types.MultiRAGQueryResult, types.MultiRAGQueryResult]:
+        ctx, result = self.__options.merge_options(baml_options).create_async_stream(function_name="GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium", args={
+            "conversation_history": conversation_history,"user_query": user_query,
+        })
+        return baml_py.BamlStream[stream_types.MultiRAGQueryResult, types.MultiRAGQueryResult](
+          result,
+          lambda x: typing.cast(stream_types.MultiRAGQueryResult, x.cast_to(types, types, stream_types, True, __runtime__)),
+          lambda x: typing.cast(types.MultiRAGQueryResult, x.cast_to(types, types, stream_types, False, __runtime__)),
+          ctx,
+        )
     def GenerateMultiRAGQuery_Cerebras_GPT_OSS_120B_Low(self, conversation_history: typing.List["types.ConversationMessage"],user_query: str,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.BamlStream[stream_types.MultiRAGQueryResult, types.MultiRAGQueryResult]:
@@ -258,6 +312,20 @@ class BamlHttpRequestClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
+    async def GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low(self, conversation_history: typing.List["types.ConversationMessage"],user_query: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low", args={
+            "conversation_history": conversation_history,"user_query": user_query,
+        }, mode="request")
+        return result
+    async def GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium(self, conversation_history: typing.List["types.ConversationMessage"],user_query: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium", args={
+            "conversation_history": conversation_history,"user_query": user_query,
+        }, mode="request")
+        return result
     async def GenerateMultiRAGQuery_Cerebras_GPT_OSS_120B_Low(self, conversation_history: typing.List["types.ConversationMessage"],user_query: str,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:
@@ -308,6 +376,20 @@ class BamlHttpStreamRequestClient:
     def __init__(self, options: DoNotUseDirectlyCallManager):
         self.__options = options
 
+    async def GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low(self, conversation_history: typing.List["types.ConversationMessage"],user_query: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low", args={
+            "conversation_history": conversation_history,"user_query": user_query,
+        }, mode="stream")
+        return result
+    async def GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium(self, conversation_history: typing.List["types.ConversationMessage"],user_query: str,
+        baml_options: BamlCallOptions = {},
+    ) -> baml_py.baml_py.HTTPRequest:
+        result = await self.__options.merge_options(baml_options).create_http_request_async(function_name="GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium", args={
+            "conversation_history": conversation_history,"user_query": user_query,
+        }, mode="stream")
+        return result
     async def GenerateMultiRAGQuery_Cerebras_GPT_OSS_120B_Low(self, conversation_history: typing.List["types.ConversationMessage"],user_query: str,
         baml_options: BamlCallOptions = {},
     ) -> baml_py.baml_py.HTTPRequest:

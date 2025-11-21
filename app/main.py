@@ -385,8 +385,10 @@ SAMPLE_CONVERSATION_HISTORY = [
 class LatencyComparisonResult(BaseModel):
     cerebras_latency_ms: float
     groq_latency_ms: float
+    baseten_latency_ms: float | None = None
     cerebras_response: MultiRAGQueryResult
     groq_response: MultiRAGQueryResult
+    baseten_response: MultiRAGQueryResult | None = None
 
 
 @app.get("/multi-rag-query/test")
@@ -401,20 +403,29 @@ async def generate_multi_rag_query_test(
     user_query = "RAG 기술의 주요 한계점과 해결 방안은 무엇인가요?"
 
     # Define the functions to call based on the option
+    cerebras_func = None
+    groq_func = None
+    baseten_func = None
+
     if option == 1:
         cerebras_func = b.GenerateMultiRAGQuery_Cerebras_Qwen3_32B
         groq_func = b.GenerateMultiRAGQuery_Groq_Qwen3_32B
+        # Baseten Qwen not configured yet as per previous instructions
     elif option == 2:
         cerebras_func = b.GenerateMultiRAGQuery_Cerebras_GPT_OSS_120B_Medium
         groq_func = b.GenerateMultiRAGQuery_Groq_GPT_OSS_120B_Medium
+        baseten_func = b.GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Medium
     elif option == 3:
         cerebras_func = b.GenerateMultiRAGQuery_Cerebras_GPT_OSS_120B_Low
         groq_func = b.GenerateMultiRAGQuery_Groq_GPT_OSS_120B_Low
+        baseten_func = b.GenerateMultiRAGQuery_Baseten_GPT_OSS_120B_Low
     else:
         # Should be handled by Query validation, but just in case
         raise HTTPException(status_code=400, detail="Invalid option.")
 
     async def measure_latency(func, **kwargs):
+        if func is None:
+            return None, None
         start_time = time.perf_counter()
         try:
             result = await func(**kwargs)
@@ -434,28 +445,48 @@ async def generate_multi_rag_query_test(
         ConversationMessage(role="system", content=f"Random prefix: {random_prefix}")
     ] + SAMPLE_CONVERSATION_HISTORY
 
-    # Run both requests in parallel
+    # Run requests in parallel
     try:
-        (cerebras_latency, cerebras_res), (groq_latency, groq_res) = (
-            await asyncio.gather(
+        tasks = [
+            measure_latency(
+                cerebras_func,
+                conversation_history=modified_history,
+                user_query=user_query,
+            ),
+            measure_latency(
+                groq_func,
+                conversation_history=modified_history,
+                user_query=user_query,
+            ),
+        ]
+
+        if baseten_func:
+            tasks.append(
                 measure_latency(
-                    cerebras_func,
+                    baseten_func,
                     conversation_history=modified_history,
                     user_query=user_query,
-                ),
-                measure_latency(
-                    groq_func,
-                    conversation_history=modified_history,
-                    user_query=user_query,
-                ),
+                )
             )
-        )
+
+        results = await asyncio.gather(*tasks)
+
+        (cerebras_latency, cerebras_res) = results[0]
+        (groq_latency, groq_res) = results[1]
+
+        baseten_latency = None
+        baseten_res = None
+        if len(results) > 2:
+            (baseten_latency, baseten_res) = results[2]
+
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"LLM Call failed: {str(e)}")
 
     return LatencyComparisonResult(
         cerebras_latency_ms=cerebras_latency,
         groq_latency_ms=groq_latency,
+        baseten_latency_ms=baseten_latency,
         cerebras_response=cerebras_res,
         groq_response=groq_res,
+        baseten_response=baseten_res,
     )
