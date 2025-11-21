@@ -26,6 +26,12 @@ from .baseten_latency import (
     BasetenLatencyError,
     measure_baseten_embedding_latency,
 )
+from baml_client import b
+from baml_client.types import ConversationMessage, MultiRAGQueryResult
+from pydantic import BaseModel
+from typing import List
+import time
+import asyncio
 
 app = FastAPI(title="MiniMax TTS Latency Test")
 logger = logging.getLogger(__name__)
@@ -342,3 +348,114 @@ async def voyage_embedding_latency(
             raise HTTPException(status_code=502, detail=str(exc))
 
     return result
+
+
+SAMPLE_CONVERSATION_HISTORY = [
+    ConversationMessage(
+        role="user", content="안녕하세요, 최근 생성형 AI 트렌드에 대해 알고 싶습니다."
+    ),
+    ConversationMessage(
+        role="assistant",
+        content="네, 생성형 AI는 텍스트, 이미지, 오디오 생성 등 다양한 분야에서 발전하고 있습니다. 구체적으로 어떤 분야에 관심이 있으신가요?",
+    ),
+    ConversationMessage(
+        role="user", content="특히 RAG(검색 증강 생성) 기술의 최신 동향이 궁금합니다."
+    ),
+    ConversationMessage(
+        role="assistant",
+        content="RAG 기술은 LLM의 환각 현상을 줄이고 최신 정보를 반영할 수 있어 주목받고 있습니다. 최근에는 Graph RAG나 Agentic RAG 같은 고도화된 기법들이 연구되고 있습니다.",
+    ),
+    ConversationMessage(
+        role="user", content="Graph RAG가 기존 벡터 검색 기반 RAG와 어떻게 다른가요?"
+    ),
+    ConversationMessage(
+        role="assistant",
+        content="Graph RAG는 지식 그래프를 활용하여 데이터 간의 관계를 파악하므로, 단순한 키워드 매칭보다 복합적인 추론이 필요한 질문에 더 정확한 답변을 제공할 수 있습니다.",
+    ),
+    ConversationMessage(
+        role="user", content="그렇군요. 그러면 Agentic RAG는 무엇인가요?"
+    ),
+    ConversationMessage(
+        role="assistant",
+        content="Agentic RAG는 AI 에이전트가 스스로 검색 전략을 수립하고, 필요에 따라 여러 번 검색하거나 도구를 사용하여 정보를 종합하는 방식입니다. 더 복잡한 문제 해결에 적합합니다.",
+    ),
+]
+
+
+class LatencyComparisonResult(BaseModel):
+    cerebras_latency_ms: float
+    groq_latency_ms: float
+    cerebras_response: MultiRAGQueryResult
+    groq_response: MultiRAGQueryResult
+
+
+@app.get("/multi-rag-query/test")
+async def generate_multi_rag_query_test(
+    option: int = Query(
+        ...,
+        ge=1,
+        le=3,
+        description="Option to compare (1: Qwen 32B, 2: GPT 120B Medium, 3: GPT 120B Low)",
+    ),
+):
+    user_query = "RAG 기술의 주요 한계점과 해결 방안은 무엇인가요?"
+
+    # Define the functions to call based on the option
+    if option == 1:
+        cerebras_func = b.GenerateMultiRAGQuery_Cerebras_Qwen3_32B
+        groq_func = b.GenerateMultiRAGQuery_Groq_Qwen3_32B
+    elif option == 2:
+        cerebras_func = b.GenerateMultiRAGQuery_Cerebras_GPT_OSS_120B_Medium
+        groq_func = b.GenerateMultiRAGQuery_Groq_GPT_OSS_120B_Medium
+    elif option == 3:
+        cerebras_func = b.GenerateMultiRAGQuery_Cerebras_GPT_OSS_120B_Low
+        groq_func = b.GenerateMultiRAGQuery_Groq_GPT_OSS_120B_Low
+    else:
+        # Should be handled by Query validation, but just in case
+        raise HTTPException(status_code=400, detail="Invalid option.")
+
+    async def measure_latency(func, **kwargs):
+        start_time = time.perf_counter()
+        try:
+            result = await func(**kwargs)
+            end_time = time.perf_counter()
+            latency_ms = (end_time - start_time) * 1000
+            return latency_ms, result
+        except Exception as e:
+            logger.error(f"Error in call: {e}")
+            raise e
+
+    # Add a random system message at the start to prevent prompt caching
+    import random
+    import string
+
+    random_prefix = "".join(random.choices(string.ascii_letters + string.digits, k=10))
+    modified_history = [
+        ConversationMessage(role="system", content=f"Random prefix: {random_prefix}")
+    ] + SAMPLE_CONVERSATION_HISTORY
+
+    # Run both requests in parallel
+    try:
+        (cerebras_latency, cerebras_res), (groq_latency, groq_res) = (
+            await asyncio.gather(
+                measure_latency(
+                    cerebras_func,
+                    conversation_history=modified_history,
+                    user_query=user_query,
+                ),
+                measure_latency(
+                    groq_func,
+                    conversation_history=modified_history,
+                    user_query=user_query,
+                ),
+            )
+        )
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"LLM Call failed: {str(e)}")
+
+    return LatencyComparisonResult(
+        cerebras_latency_ms=cerebras_latency,
+        groq_latency_ms=groq_latency,
+        cerebras_response=cerebras_res,
+        groq_response=groq_res,
+    )

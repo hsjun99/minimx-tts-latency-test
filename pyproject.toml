@@ -13,7 +13,8 @@ dependencies = [
     "uvicorn (>=0.38.0,<0.39.0)",
     "aiohttp (>=3.13.1,<4.0.0)",
     "python-dotenv (>=1.1.1,<2.0.0)",
-    "baseten-performance-client (>=0.0.11,<0.0.12)"
+    "baseten-performance-client (>=0.0.11,<0.0.12)",
+    "baml-py (>=0.213.0,<0.214.0)"
 ]
 
 
