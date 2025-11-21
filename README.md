@@ -36,6 +36,8 @@ cp .env.example .env  # if you have one, otherwise create a new .env
 | `AZURE_OPENAI_SYSTEM_PROMPT_PATH` | ⛔️                 | Path to the system prompt file for Azure TTFT (defaults to `app/prompts/openai_system_prompt.txt`). |
 | `OPENROUTER_API_KEY`              | ✅ (for OpenRouter) | OpenRouter API key.                                                                                 |
 | `OPENROUTER_BASE_URL`             | ⛔️                 | OpenRouter base URL (defaults to `https://openrouter.ai/api/v1`).                                   |
+| `BASETEN_API_KEY`                 | ✅ (for Baseten)    | Baseten API key.                                                                                    |
+| `BASETEN_MODEL_ID`                | ✅ (for Baseten)    | Baseten Model ID (defaults to `yqv0rjjw`).                                                          |
 
 ## Run
 
@@ -136,6 +138,29 @@ Response example:
   "model": "qwen/qwen3-embedding-8b",
   "input_text": "Your text string goes here",
   "base_url": "https://openrouter.ai/api/v1/embeddings"
+}
+```
+
+### Baseten Embedding Latency
+
+`GET /baseten/embedding-latency`
+
+Query params:
+
+- `text` (required): text input to embed.
+- `task` (optional): instruction text (useful for instruct embedding models like Qwen).
+- `model_id` (optional): Baseten model ID. Default: configured `BASETEN_MODEL_ID`.
+- `timeout_s` (optional): total timeout in seconds. Default: `10.0`
+
+Response example:
+
+```json
+{
+  "latency_ms": 110.5,
+  "model_id": "yqv0rjjw",
+  "input_text": "Gravity is a force...",
+  "formatted_input": "Instruct: Explain gravity\nQuery:Gravity is a force...",
+  "endpoint_url": "https://model-yqv0rjjw.api.baseten.co/environments/production/sync"
 }
 ```
 

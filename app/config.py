@@ -27,6 +27,10 @@ class Settings:
     azure_openai_system_prompt_path: str
     openrouter_api_key: str
     openrouter_base_url: str
+    baseten_api_key: str
+    baseten_model_id: str
+    voyage_api_key: str
+    voyage_base_url: str
 
 
 def get_settings() -> Settings:
@@ -52,6 +56,12 @@ def get_settings() -> Settings:
     openrouter_base_url = os.getenv(
         "OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"
     ).strip()
+    baseten_api_key = os.getenv("BASETEN_API_KEY", "").strip()
+    baseten_model_id = os.getenv("BASETEN_MODEL_ID", "yqv0rjjw").strip()
+    voyage_api_key = os.getenv("VOYAGE_AI_API_KEY", "").strip()
+    voyage_base_url = os.getenv(
+        "VOYAGE_BASE_URL", "https://api.voyageai.com/v1/embeddings"
+    ).strip()
 
     return Settings(
         minimax_api_key=api_key,
@@ -68,4 +78,8 @@ def get_settings() -> Settings:
         azure_openai_system_prompt_path=azure_system_prompt_path,
         openrouter_api_key=openrouter_api_key,
         openrouter_base_url=openrouter_base_url,
+        baseten_api_key=baseten_api_key,
+        baseten_model_id=baseten_model_id,
+        voyage_api_key=voyage_api_key,
+        voyage_base_url=voyage_base_url,
     )

@@ -16,6 +16,16 @@ from .openrouter_latency import (
     OpenRouterLatencyError,
     measure_openrouter_embedding_latency,
 )
+from .voyage_latency import (
+    VoyageConfig,
+    VoyageLatencyError,
+    measure_voyage_embedding_latency,
+)
+from .baseten_latency import (
+    BasetenLatencyConfig,
+    BasetenLatencyError,
+    measure_baseten_embedding_latency,
+)
 
 app = FastAPI(title="MiniMax TTS Latency Test")
 logger = logging.getLogger(__name__)
@@ -225,6 +235,108 @@ async def openrouter_embedding_latency(
                 timeout_s=timeout_s,
             )
         except OpenRouterLatencyError as exc:
+            raise HTTPException(status_code=502, detail=str(exc))
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail=str(exc))
+
+    return result
+
+
+@app.get("/baseten/embedding-latency")
+async def baseten_embedding_latency(
+    text: str = Query(
+        ...,
+        min_length=1,
+        description="Text input for embedding latency measurement",
+    ),
+    task: str = Query(
+        default="",
+        description="Optional task instruction for models like Qwen-3-embedding",
+    ),
+    model_id: str | None = Query(
+        default=None,
+        description="Baseten model ID (defaults to config BASETEN_MODEL_ID)",
+    ),
+    timeout_s: float = Query(
+        default=10.0, ge=1.0, le=60.0, description="Overall timeout in seconds"
+    ),
+):
+    settings = get_settings()
+    if not settings.baseten_api_key:
+        raise HTTPException(status_code=500, detail="BASETEN_API_KEY is not configured")
+
+    default_model_id = settings.baseten_model_id
+    selected_model_id = (model_id or default_model_id).strip()
+    if not selected_model_id:
+        raise HTTPException(
+            status_code=400,
+            detail="Model ID parameter is required (or BASETEN_MODEL_ID in env)",
+        )
+
+    cfg = BasetenLatencyConfig(
+        api_key=settings.baseten_api_key,
+        model_id=selected_model_id,
+    )
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            result = await measure_baseten_embedding_latency(
+                session=session,
+                cfg=cfg,
+                input_text=text,
+                task_description=task,
+                timeout_s=timeout_s,
+            )
+        except BasetenLatencyError as exc:
+            raise HTTPException(status_code=502, detail=str(exc))
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail=str(exc))
+
+    return result
+
+
+@app.get("/voyage/embedding-latency")
+async def voyage_embedding_latency(
+    text: str = Query(
+        ...,
+        min_length=1,
+        description="Text input for embedding latency measurement",
+    ),
+    model: str | None = Query(
+        default="voyage-3.5-lite",
+        description="Voyage AI model identifier",
+    ),
+    timeout_s: float = Query(
+        default=10.0, ge=1.0, le=60.0, description="Overall timeout in seconds"
+    ),
+):
+    settings = get_settings()
+    # At least one key must be present
+    if not settings.voyage_api_key:
+        raise HTTPException(
+            status_code=500, detail="VOYAGE_AI_API_KEY is not configured"
+        )
+
+    selected_model = (model or "voyage-3.5-lite").strip()
+    if not selected_model:
+        raise HTTPException(status_code=400, detail="Model parameter cannot be blank")
+
+    cfg = VoyageConfig(
+        api_key=settings.voyage_api_key,
+        base_url=settings.voyage_base_url,
+        model=selected_model,
+    )
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            # wrapping text in list as the measure function expects list[str]
+            result = await measure_voyage_embedding_latency(
+                session=session,
+                cfg=cfg,
+                texts=[text],
+                timeout_s=timeout_s,
+            )
+        except VoyageLatencyError as exc:
             raise HTTPException(status_code=502, detail=str(exc))
         except Exception as exc:
             raise HTTPException(status_code=502, detail=str(exc))
