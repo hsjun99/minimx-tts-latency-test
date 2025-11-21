@@ -34,6 +34,8 @@ cp .env.example .env  # if you have one, otherwise create a new .env
 | `AZURE_OPENAI_MODEL`              | ⛔️ (Azure TTFT)    | Azure OpenAI model/deployment identifier for request body (optional if deployment path is used).    |
 | `AZURE_OPENAI_API_VERSION`        | ⛔️                 | API version for Azure OpenAI (defaults to `2024-02-15-preview`).                                    |
 | `AZURE_OPENAI_SYSTEM_PROMPT_PATH` | ⛔️                 | Path to the system prompt file for Azure TTFT (defaults to `app/prompts/openai_system_prompt.txt`). |
+| `OPENROUTER_API_KEY`              | ✅ (for OpenRouter) | OpenRouter API key.                                                                                 |
+| `OPENROUTER_BASE_URL`             | ⛔️                 | OpenRouter base URL (defaults to `https://openrouter.ai/api/v1`).                                   |
 
 ## Run
 
@@ -113,6 +115,27 @@ Response example:
   "system_prompt_path": "app/prompts/openai_system_prompt.txt",
   "user_prompt": "Explain how rain forms.",
   "base_url": "https://my-resource.openai.azure.com/openai/deployments/gpt-4o-mini-live/chat/completions?api-version=2024-02-15-preview"
+}
+```
+
+### OpenRouter Embedding Latency
+
+`GET /openrouter/embedding-latency`
+
+Query params:
+
+- `text` (required): text input to embed.
+- `model` (optional): OpenRouter model identifier. Default: `qwen/qwen3-embedding-8b`.
+- `timeout_s` (optional): total timeout in seconds. Default: `10.0`
+
+Response example:
+
+```json
+{
+  "latency_ms": 45.6,
+  "model": "qwen/qwen3-embedding-8b",
+  "input_text": "Your text string goes here",
+  "base_url": "https://openrouter.ai/api/v1/embeddings"
 }
 ```
 

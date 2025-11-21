@@ -25,6 +25,8 @@ class Settings:
     azure_openai_model: str
     azure_openai_api_version: str
     azure_openai_system_prompt_path: str
+    openrouter_api_key: str
+    openrouter_base_url: str
 
 
 def get_settings() -> Settings:
@@ -46,6 +48,10 @@ def get_settings() -> Settings:
     azure_system_prompt_path = os.getenv(
         "AZURE_OPENAI_SYSTEM_PROMPT_PATH", DEFAULT_SYSTEM_PROMPT_PATH
     ).strip()
+    openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
+    openrouter_base_url = os.getenv(
+        "OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1"
+    ).strip()
 
     return Settings(
         minimax_api_key=api_key,
@@ -60,4 +66,6 @@ def get_settings() -> Settings:
         azure_openai_model=azure_model,
         azure_openai_api_version=azure_api_version,
         azure_openai_system_prompt_path=azure_system_prompt_path,
+        openrouter_api_key=openrouter_api_key,
+        openrouter_base_url=openrouter_base_url,
     )

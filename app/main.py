@@ -11,6 +11,11 @@ from .openai_latency import (
     OpenAILatencyError,
     measure_openai_ttft,
 )
+from .openrouter_latency import (
+    OpenRouterLatencyConfig,
+    OpenRouterLatencyError,
+    measure_openrouter_embedding_latency,
+)
 
 app = FastAPI(title="MiniMax TTS Latency Test")
 logger = logging.getLogger(__name__)
@@ -175,6 +180,53 @@ async def azure_openai_ttft_latency(
             raise HTTPException(status_code=502, detail=str(exc))
         except Exception as exc:
             logger.exception("Azure OpenAI TTFT unexpected error: %s", exc)
+            raise HTTPException(status_code=502, detail=str(exc))
+
+    return result
+
+
+@app.get("/openrouter/embedding-latency")
+async def openrouter_embedding_latency(
+    text: str = Query(
+        ...,
+        min_length=1,
+        description="Text input for embedding latency measurement",
+    ),
+    model: str | None = Query(
+        default="qwen/qwen3-embedding-8b",
+        description="OpenRouter model identifier",
+    ),
+    timeout_s: float = Query(
+        default=10.0, ge=1.0, le=60.0, description="Overall timeout in seconds"
+    ),
+):
+    settings = get_settings()
+    if not settings.openrouter_api_key:
+        raise HTTPException(
+            status_code=500, detail="OPENROUTER_API_KEY is not configured"
+        )
+
+    selected_model = (model or "qwen/qwen3-embedding-8b").strip()
+    if not selected_model:
+        raise HTTPException(status_code=400, detail="Model parameter cannot be blank")
+
+    cfg = OpenRouterLatencyConfig(
+        api_key=settings.openrouter_api_key,
+        model=selected_model,
+        base_url=settings.openrouter_base_url,
+    )
+
+    async with aiohttp.ClientSession() as session:
+        try:
+            result = await measure_openrouter_embedding_latency(
+                session=session,
+                cfg=cfg,
+                input_text=text,
+                timeout_s=timeout_s,
+            )
+        except OpenRouterLatencyError as exc:
+            raise HTTPException(status_code=502, detail=str(exc))
+        except Exception as exc:
             raise HTTPException(status_code=502, detail=str(exc))
 
     return result
